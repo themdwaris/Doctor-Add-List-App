@@ -1,34 +1,30 @@
-
 import uploadFile from "@/lib/uploadFile";
 import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import Loader from "./Loader";
 
 const AddDoctorForm = () => {
   const [name, setName] = useState("");
   const [profession, setProfession] = useState("");
-  const [address,setAddress]=useState("")
+  const [address, setAddress] = useState("");
   const [fees, setFees] = useState("");
   const [experience, setExperience] = useState("");
   const [languages, setLanguages] = useState([]);
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
-  const [data,setData]=useState({})
-  const [uploading, setUploading] = useState(false);
-  const [loading,setLoading]=useState(false)
+
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = async (e) => {
     e.stopPropagation();
     try {
-      setUploading(true);
       const file = e.target.files[0];
       const userAvatar = await uploadFile(file);
       setImageUrl(userAvatar?.url);
       // setData((prev) => ({ ...prev, avatar: userAvatar?.url }));
-      setUploading(false);
     } catch (error) {
       console.log(error);
-      setUploading(false);
     }
   };
 
@@ -44,7 +40,7 @@ const AddDoctorForm = () => {
   const handleAddForm = async (e) => {
     e.preventDefault();
     console.log("hello");
-    
+
     try {
       const formData = new FormData();
       formData.append("name", name);
@@ -54,40 +50,46 @@ const AddDoctorForm = () => {
       formData.append("experience", experience);
       formData.append("languages", JSON.stringify(languages));
       imageUrl && formData.append("imageUrl", imageUrl);
-      
-      setLoading(true)
-      const res = await axios.post('/api/add',formData)
-      console.log(res);
-      
-      if(res?.data?.success){
+
+      setLoading(true);
+      const res = await axios.post("/api/add", formData);
+      // console.log(res);
+
+      if (res?.data?.success) {
         // console.log(res.data);
-        toast.success("Doctor added successfully")
-        setLoading(false)
-        setName("")
-        setProfession("")
-        setAddress("")
-        setFees("")
-        setExperience("")
-        setLanguages([])
-        setImageUrl("")
-        setFile(null)
+        toast.success("Doctor added successfully");
+        setLoading(false);
+        setName("");
+        setProfession("");
+        setAddress("");
+        setFees("");
+        setExperience("");
+        setLanguages([]);
+        setImageUrl("");
+        setFile(null);
       }
-      
     } catch (error) {
-      setLoading(false)
-      toast.error(error?.message||error)
+      setLoading(false);
+      toast.error(error?.message || error);
       console.log("Failed to add data::", error);
     }
   };
- console.log(imageUrl);
- 
+
   return (
     <form
       onSubmit={handleAddForm}
-      className="w-full max-w-3xl mx-auto flex flex-col gap-4"
+      className="w-full max-w-3xl mx-auto flex flex-col gap-4 relative"
     >
+      {loading && (
+        <div className="absolute inset-0 backdrop-blur-xs flex items-center justify-center h-full">
+          <Loader />
+        </div>
+      )}
+
       <div>
-        <p className="text-base font-medium text-slate-500 mb-2">Upload Profile</p>
+        <p className="text-base font-medium text-slate-500 mb-2">
+          Upload Profile
+        </p>
         <label
           htmlFor="add-profile"
           className="inline-block relative w-20 h-20 cursor-pointer rounded-full"
@@ -115,7 +117,7 @@ const AddDoctorForm = () => {
           placeholder="Name"
           name="name"
           value={name}
-          onChange={(e)=>setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           className="w-full rounded-xl px-3 py-2 outline-blue-900 border-none bg-black/5"
         />
       </div>
@@ -129,7 +131,7 @@ const AddDoctorForm = () => {
           placeholder="Profession"
           name="profession"
           value={profession}
-          onChange={(e)=>setProfession(e.target.value)}
+          onChange={(e) => setProfession(e.target.value)}
           className="w-full rounded-md px-3 py-2 outline-blue-900 border-none bg-black/10"
         />
       </div>
@@ -143,7 +145,7 @@ const AddDoctorForm = () => {
           placeholder="Experience"
           name="experience"
           value={experience}
-          onChange={(e)=>setExperience(e.target.value)}
+          onChange={(e) => setExperience(e.target.value)}
           className="rounded-md px-3 py-2 outline-blue-900 border-none bg-black/10"
         />
       </div>
@@ -157,7 +159,7 @@ const AddDoctorForm = () => {
           placeholder="Add loaction"
           name="address"
           value={address}
-          onChange={(e)=>setAddress(e.target.value)}
+          onChange={(e) => setAddress(e.target.value)}
           className="w-full rounded-md px-3 py-2 outline-blue-900 border-none bg-black/10"
         />
       </div>
@@ -168,7 +170,7 @@ const AddDoctorForm = () => {
           placeholder="Fees"
           name="fees"
           value={fees}
-          onChange={(e)=>setFees(e.target.value)}
+          onChange={(e) => setFees(e.target.value)}
           className="rounded-md px-3 py-2 outline-blue-900 border-none bg-black/10"
         />
       </div>
@@ -243,8 +245,6 @@ const AddDoctorForm = () => {
             onChange={handleLanguages}
           />
         </div>
-
-
 
         <div>
           <label
@@ -367,7 +367,12 @@ const AddDoctorForm = () => {
           />
         </div>
       </div>
-      <button type="submit" className="w-28 text-white px-6 py-2 bg-blue-500 cursor-pointer transition transform active:scale-90 mt-5 text-base font-bold" onClick={handleAddForm}>
+      <button
+      disabled={loading}
+        type="submit"
+        className={`w-28 text-white px-6 py-2 bg-blue-500 cursor-pointer transition transform active:scale-90 mt-5 text-base font-bold ${loading&&"opacity-70"}`}
+        onClick={handleAddForm}
+      >
         Add
       </button>
     </form>
